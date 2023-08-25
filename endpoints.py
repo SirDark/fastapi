@@ -42,7 +42,7 @@ async def convert(uploadedfile: UploadFile = File(...), convertto: str = Form(..
     db.commit()
     conversion_id = conversion_model.id
 
-    backtask = BackgroundTask(Path("./files/" + conversion_model.original), convertto, Path("./files/"), conversion_id)
+    backtask = BackgroundTask("./files/" + conversion_model.original, convertto, "./files/", conversion_id)
     backtask.start()
     return conversion_model
 
@@ -70,11 +70,14 @@ async def downloadconverted(file_id: int, db: Session = Depends(get_db)):
         return {404: {"description": "conversion is still in progress"}}
 
     fileformat = conversion_model.converted.split('.')[1]
-    return FileResponse(path='./files/' + conversion_model.converted, filename=conversion_model.converted,
+    return FileResponse(path=conversion_model.converted, filename=conversion_model.converted,
                         media_type=fileformat)
 
 
 # only for development purposes will be removed in the future
 @router.delete("/deletehistory")
-async def deletehistory():
+async def deletehistory(db: Session = Depends(get_db)):
+    db.query(models.Conversions).delete()
+    db.commit()
+
     return router.responses.get(200)

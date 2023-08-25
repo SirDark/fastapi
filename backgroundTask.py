@@ -1,13 +1,12 @@
+import subprocess
 import threading
 from pathlib import Path
-from converter import convertModelFiles
-import asyncio
 import models
 from databasehandler import get_db
 
 
 class BackgroundTask(threading.Thread):
-    def __init__(self, input_path: Path, pformat: str, output_path: Path, dbid):
+    def __init__(self, input_path: str, pformat: str, output_path: str, dbid):
         super(BackgroundTask, self).__init__()
         self.input_path = input_path
         self.fileformat = pformat
@@ -24,12 +23,22 @@ class BackgroundTask(threading.Thread):
         db.add(conversion_model)
         db.commit()
 
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
+        strcommand = "python .\\files\\converter.py " + self.input_path + " " + self.fileformat + " " + self.output_path
+
+        command = ["python", strcommand, str(self.input_path), self.fileformat, self.output_path]
+        print(strcommand)
+        process = subprocess.Popen(strcommand, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
         print("conversion started.")
-        loop.run_until_complete(convertModelFiles(self.input_path, self.fileformat, self.output_path))
-        loop.close()
+        while True:
+            stdout_line = process.stdout.readline()
+
+            if stdout_line:
+                print("stdout:", stdout_line.strip())
+            if process.poll() is not None and stdout_line == '':
+                # Process has completed and there is no more output
+                break
+
         print("conversion completed.")
 
         conversion_model.status = "Done"
