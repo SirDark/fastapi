@@ -12,3 +12,5 @@ async def convertModelFiles(input_path: Path, pformat: str, output_path: Path):
     filename = (str(input_path).split('/')[-1].split('.')[0]) + pformat
     shutil.copy(input_path, filename)
     print("converted")
+
+
