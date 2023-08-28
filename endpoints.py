@@ -75,9 +75,8 @@ async def downloadconverted(file_id: int, db: Session = Depends(get_db)):
 
 
 # only for development purposes will be removed in the future
-@router.delete("/deletehistory")
-async def deletehistory(db: Session = Depends(get_db)):
-    db.query(models.Conversions).delete()
-    db.commit()
-
-    return router.responses.get(200)
+#@router.delete("/deletehistory")
+#async def deletehistory(db: Session = Depends(get_db)):
+#    db.query(models.Conversions).delete()
+#    db.commit()
+#    return router.responses.get(200)

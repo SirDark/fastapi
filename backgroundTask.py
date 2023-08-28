@@ -4,14 +4,6 @@ import models
 from databasehandler import get_db
 
 
-def execute(command):
-    process = subprocess.Popen(command, stdout=subprocess.PIPE, universal_newlines=True, bufsize=1)
-    while True:
-        line = process.stdout.readline()
-        print("not halt")
-        print(line, end='')
-        if not line:
-            break
 class BackgroundTask(threading.Thread):
     def __init__(self, input_path: str, pformat: str, output_path: str, dbid):
         super(BackgroundTask, self).__init__()
@@ -32,8 +24,7 @@ class BackgroundTask(threading.Thread):
 
         strcommand = "python -u .\\files\\converter.py " + self.input_path + " " + self.fileformat + " " + self.output_path
 
-        command = ["python", strcommand, str(self.input_path), self.fileformat, self.output_path]
-        print(strcommand)
+        # print(strcommand)
 
         process = subprocess.Popen(strcommand, stdout=subprocess.PIPE, universal_newlines=True, bufsize=1)
         while True:
@@ -43,8 +34,6 @@ class BackgroundTask(threading.Thread):
             db.commit()
             if not line:
                 break
-
-        #process = subprocess.check_call(strcommand, stdout=sys.stdout, stderr=subprocess.PIPE, text=True) ez megy
 
         print("conversion completed.")
 
