@@ -1,7 +1,6 @@
 from fastapi import APIRouter, File, UploadFile, Form, HTTPException, Depends
 from fastapi.responses import FileResponse
 import aiofiles
-from pathlib import Path
 from backgroundTask import BackgroundTask
 # for database
 import models
@@ -32,12 +31,13 @@ async def convert(uploadedfile: UploadFile = File(...), convertto: str = Form(..
         raise HTTPException(status_code=400, detail="conversion only supported to " + ' '.join(convertable_formats))
     splitted_filename = uploadedfile.filename.split('.')
     generated_name = splitted_filename[0] + uuid.uuid4().hex + '.' + splitted_filename[-1]
+
     await savefile(uploadedfile, generated_name)
 
     conversion_model = models.Conversions()
     conversion_model.original = generated_name
     conversion_model.status = "Waiting"
-    conversion_model.converted = splitted_filename[0] + convertto
+    conversion_model.converted = (generated_name.split('.'))[0] + convertto
     db.add(conversion_model)
     db.commit()
     conversion_id = conversion_model.id
@@ -70,7 +70,7 @@ async def downloadconverted(file_id: int, db: Session = Depends(get_db)):
         return {404: {"description": "conversion is still in progress"}}
 
     fileformat = conversion_model.converted.split('.')[1]
-    return FileResponse(path=conversion_model.converted, filename=conversion_model.converted,
+    return FileResponse(path='./files/' + conversion_model.converted, filename=conversion_model.converted,
                         media_type=fileformat)
 
 

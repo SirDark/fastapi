@@ -1,9 +1,7 @@
 import subprocess
 import threading
-from pathlib import Path
 import models
 from databasehandler import get_db
-import sys
 
 
 def execute(command):
@@ -40,7 +38,7 @@ class BackgroundTask(threading.Thread):
         process = subprocess.Popen(strcommand, stdout=subprocess.PIPE, universal_newlines=True, bufsize=1)
         while True:
             line = process.stdout.readline()
-            conversion_model.status = "in progress " + line
+            conversion_model.status = "in progress " + line.strip()
             db.add(conversion_model)
             db.commit()
             if not line:
